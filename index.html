@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Triplet Match — A City Memory Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+<style>
+  /* =========================================================
+     Triplet Match — Stylesheet
+     - Layout, theming, tile 3D flip, animations, responsive
+     ========================================================= */
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg-overlay: rgba(10, 14, 30, 0.45);
+    --panel-bg: rgba(15, 23, 42, 0.55);
+    --panel-border: rgba(255, 255, 255, 0.12);
+    --panel-border-strong: rgba(255, 255, 255, 0.22);
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --accent: #F59E0B;
+    --accent-glow: rgba(245, 158, 11, 0.55);
+    --success: #10B981;
+    --success-glow: rgba(16, 185, 129, 0.55);
+    --error: #F43F5E;
+    --folder-cream: #f4e3b8;
+    --folder-cream-dark: #d8c084;
+    --folder-tab: #c4a766;
+    --paper: #fbf7ec;
+    --paper-dark: #e8e0c7;
+
+    --flip-duration: 550ms;
+    --flip-back-duration: 450ms;
+    --flip-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
+    --overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    background-color: #0b1020;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-image:
+      linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+      url('bg.jpeg');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 32px;
+  }
+
+  /* ===== HUD ===== */
+  .hud {
+    width: min(1100px, 95vw);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 22px;
+    margin-bottom: 18px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--panel-border);
+    border-radius: 18px;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .hud-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.3px;
+    color: var(--text-primary);
+  }
+  .hud-title .logo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  .hud-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+  }
+  .stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--panel-border);
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .stat .stat-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat .stat-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+  }
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+  .stat .stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    opacity: 0.85;
+    margin-right: 2px;
+  }
+  .stat .stat-value {
+    font-variant-numeric: tabular-nums;
+    transition: transform 240ms ease-out;
+    will-change: transform;
+    display: inline-block;
+  }
+  .stat .stat-value.pulse { animation: hudPulse 240ms ease-out; }
+  .stat.score .stat-value { color: var(--accent); }
+  .stat.matches .stat-value { color: var(--success); }
+
+  @keyframes hudPulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .icon-btn {
+    appearance: none;
+    border: 1px solid var(--panel-border-strong);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: transform 150ms ease-out, background 150ms ease-out;
+  }
+  .icon-btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
+  .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ===== Board panel ===== */
+  .panel {
+    width: min(1100px, 95vw);
+    padding: 22px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--panel-border);
+    border-radius: 22px;
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  /* ===== Tile ===== */
+  .tile {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    aspect-ratio: 88 / 110;
+    perspective: 900px;
+    border-radius: 10px;
+    transition: transform 150ms ease-out, filter 200ms ease-out, opacity 350ms ease-out;
+    will-change: transform;
+  }
+  .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+  .tile-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform var(--flip-back-duration) var(--flip-easing);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .tile.is-flipped .tile-inner {
+    transform: rotateY(180deg);
+    transition: transform var(--flip-duration) var(--flip-easing);
+  }
+
+  .tile-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 6px 14px rgba(0, 0, 0, 0.35),
+      0 1px 0 rgba(255, 255, 255, 0.4) inset;
+  }
+
+  /* Back (face-down) — file folder */
+  .tile-back {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.18), rgba(0,0,0,0) 30%),
+      repeating-linear-gradient(45deg, rgba(0,0,0,0.025) 0 2px, transparent 2px 5px),
+      linear-gradient(160deg, var(--folder-cream) 0%, var(--folder-cream-dark) 100%);
+    color: #6b5524;
+  }
+  .tile-back::before {
+    /* folder tab */
+    content: "";
+    position: absolute;
+    top: -6px; left: 10%;
+    width: 38%; height: 18%;
+    background: linear-gradient(180deg, var(--folder-tab), var(--folder-cream-dark));
+    border-radius: 6px 8px 0 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+  }
+  .tile-back::after {
+    /* label band */
+    content: "";
+    position: absolute;
+    bottom: 14%; left: 14%; right: 14%;
+    height: 14%;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px dashed rgba(0, 0, 0, 0.18);
+    border-radius: 3px;
+  }
+  .tile-back .tile-number {
+    position: absolute;
+    bottom: 18%; left: 0; right: 0;
+    text-align: center;
+    font-weight: 700;
+    font-size: clamp(10px, 1.2vw, 13px);
+    color: #8a6a1f;
+    letter-spacing: 0.5px;
+    z-index: 1;
+  }
+
+  /* Front (revealed) — paper card */
+  .tile-front {
+    transform: rotateY(180deg);
+    background:
+      linear-gradient(180deg, var(--paper) 0%, var(--paper-dark) 100%);
+    color: #2d2418;
+    padding: 6px;
+  }
+  .tile-front .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--object-color, #94a3b8);
+  }
+  .tile-front .icon {
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1;
+    margin-top: 6px;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+  }
+  .tile-front .name {
+    margin-top: 6px;
+    font-size: clamp(8px, 0.9vw, 11px);
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #4a3a1c;
+    text-align: center;
+    line-height: 1.1;
+    padding: 0 2px;
+  }
+
+  /* Hover (face-down only) */
+  .tile:not(.is-flipped):not(.is-matched):not(.is-locked):hover {
+    transform: translateY(-4px);
+    filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
+  }
+
+  /* Matched */
+  .tile.is-matched {
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .tile.is-matched-anim {
+    animation: matchPop 700ms var(--overshoot) forwards;
+  }
+  @keyframes matchPop {
+    0%   { transform: scale(1); filter: drop-shadow(0 0 0 rgba(16,185,129,0)); }
+    40%  { transform: scale(1.15); filter: drop-shadow(0 0 18px var(--success-glow)); }
+    70%  { transform: scale(1.08); filter: drop-shadow(0 0 14px var(--success-glow)); opacity: 1; }
+    100% { transform: scale(0.85); opacity: 0; filter: drop-shadow(0 0 0 rgba(16,185,129,0)); }
+  }
+
+  /* Shake on mismatch */
+  .tile.is-shake {
+    animation: shake 320ms ease-in-out;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-6px); }
+    80%      { transform: translateX(6px); }
+  }
+
+  /* Lockout cursor */
+  .board.is-locked .tile:not(.is-flipped):not(.is-matched) { cursor: not-allowed; }
+
+  /* ===== Modal & overlays ===== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 20, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease-in;
+  }
+  .overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal {
+    width: min(440px, 100%);
+    background: rgba(20, 28, 48, 0.85);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid var(--panel-border-strong);
+    border-radius: 22px;
+    padding: 28px 26px 24px;
+    color: var(--text-primary);
+    box-shadow:
+      0 30px 70px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    text-align: center;
+    transform: scale(0.9);
+    opacity: 0;
+    transition:
+      transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .overlay.is-visible .modal {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .overlay.exiting .modal {
+    transform: scale(0.9);
+    opacity: 0;
+    transition:
+      transform 200ms ease-in,
+      opacity 200ms ease-in;
+  }
+
+  .modal h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .modal .match-icon {
+    font-size: 72px;
+    line-height: 1;
+    margin: 12px 0 10px;
+    display: inline-block;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+  }
+  .modal .match-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 4px 0 12px;
+  }
+  .modal .match-fact {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0 0 22px;
+  }
+
+  .btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.4px;
+    padding: 12px 22px;
+    border-radius: 12px;
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out;
+  }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #d97706);
+    color: #1a1407;
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(245, 158, 11, 0.5); }
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border: 1px solid var(--panel-border-strong);
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, 0.16); }
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Confirm dialog body */
+  .confirm-body { font-size: 15px; color: var(--text-secondary); margin: 4px 0 22px; line-height: 1.55; }
+
+  /* ===== Loading screen ===== */
+  .loading-overlay {
+    background: rgba(5, 8, 20, 0.78);
+  }
+  .loading-card {
+    width: min(420px, 100%);
+    text-align: center;
+    color: var(--text-primary);
+    transform: none;
+    opacity: 1;
+  }
+  .loading-overlay.exiting .loading-card {
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 280ms ease-in, transform 280ms ease-in;
+  }
+  .loading-logo {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 22px;
+    border-radius: 22px;
+    background:
+      linear-gradient(135deg, rgba(245,158,11,0.95), rgba(217,119,6,0.95));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 18px 40px rgba(245,158,11,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.35);
+    animation: logoPulse 1.6s ease-in-out infinite;
+  }
+  .loading-logo svg { width: 48px; height: 48px; display: block; }
+  @keyframes logoPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 18px 40px rgba(245,158,11,0.35), inset 0 1px 0 rgba(255,255,255,0.35); }
+    50%      { transform: scale(1.06); box-shadow: 0 22px 50px rgba(245,158,11,0.55), inset 0 1px 0 rgba(255,255,255,0.45); }
+  }
+  .loading-title {
+    margin: 0 0 6px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    color: var(--text-primary);
+  }
+  .loading-tagline {
+    margin: 0 0 22px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  .loading-dots {
+    display: inline-flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  .loading-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.35;
+    animation: dotBounce 1.2s ease-in-out infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dotBounce {
+    0%, 100% { opacity: 0.35; transform: translateY(0); }
+    50%      { opacity: 1; transform: translateY(-6px); }
+  }
+
+  /* ===== Start screen ===== */
+  .start-screen .modal { width: min(480px, 100%); }
+  .start-screen h1 {
+    margin: 0 0 6px;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+  }
+  .start-screen .tagline {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin: 6px 0 8px;
+  }
+  .start-screen .instructions {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 12px 0 22px;
+  }
+  .start-screen .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 999px;
+    padding: 4px 10px;
+    margin-bottom: 12px;
+  }
+
+  /* ===== Win screen ===== */
+  .win-modal { width: min(520px, 100%); }
+  .win-modal h2 { font-size: 26px; }
+  .win-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 18px 0 22px;
+  }
+  .win-stat {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 12px 10px;
+  }
+  .win-stat .label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .win-stat .value {
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 1023px) {
+    .board { gap: 8px; }
+  }
+  @media (max-width: 767px) {
+    body { padding: 16px 10px 24px; }
+    .hud { padding: 12px 14px; gap: 8px; flex-wrap: wrap; }
+    .hud-title { font-size: 16px; }
+    .stat { padding: 6px 10px; font-size: 12px; gap: 6px; }
+    .stat .stat-label { font-size: 9px; letter-spacing: 0.8px; }
+    .panel { padding: 14px; border-radius: 18px; }
+    .board {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }
+  }
+  @media (max-width: 479px) {
+    .hud {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .hud-stats { justify-content: space-between; }
+    .board {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .tile-front .name { font-size: 8px; letter-spacing: 0.3px; }
+  }
+
+  /* ===== Reduced motion ===== */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --flip-duration: 100ms;
+      --flip-back-duration: 100ms;
+    }
+    .tile.is-shake,
+    .tile.is-matched-anim,
+    .stat .stat-value.pulse,
+    .modal,
+    .overlay {
+      animation: none !important;
+      transition-duration: 100ms !important;
+    }
+    .tile:not(.is-flipped):not(.is-matched):not(.is-locked):hover {
+      transform: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HUD ===== -->
+<header class="hud" aria-label="Game status">
+  <div class="hud-title">
+    <span class="logo-dot" aria-hidden="true"></span>
+    Triplet Match
+  </div>
+  <div class="hud-stats" role="group" aria-label="Game statistics">
+    <span class="stat timer" title="Elapsed time">
+      <span class="stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ic-timer-body" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#64748b"/>
+              <stop offset="100%" stop-color="#1e293b"/>
+            </linearGradient>
+          </defs>
+          <rect x="9.5" y="2" width="5" height="2.4" rx="1.2" fill="#475569"/>
+          <rect x="10.75" y="0.6" width="2.5" height="2" rx="0.8" fill="#64748b"/>
+          <circle cx="12" cy="14" r="8.5" fill="url(#ic-timer-body)" stroke="#0f172a" stroke-width="0.6"/>
+          <circle cx="12" cy="14" r="6.6" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="0.6"/>
+          <path d="M12 14 L12 9.2" stroke="#f8fafc" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M12 14 L15.2 14" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="12" cy="14" r="1.1" fill="#f8fafc"/>
+        </svg>
+      </span>
+      <span class="stat-label">Time</span>
+      <span class="stat-value" id="stat-timer" aria-live="off">00:00</span>
+    </span>
+    <span class="stat matches" title="Matches found">
+      <span class="stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="ic-target-out" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0%" stop-color="#fb7185"/>
+              <stop offset="100%" stop-color="#dc2626"/>
+            </radialGradient>
+          </defs>
+          <circle cx="12" cy="12" r="10" fill="url(#ic-target-out)" stroke="#7f1d1d" stroke-width="0.6"/>
+          <circle cx="12" cy="12" r="7.2" fill="#f8fafc"/>
+          <circle cx="12" cy="12" r="4.8" fill="#ef4444"/>
+          <circle cx="12" cy="12" r="2.4" fill="#f8fafc"/>
+          <circle cx="12" cy="12" r="1.1" fill="#dc2626"/>
+        </svg>
+      </span>
+      <span class="stat-label">Matches</span>
+      <span class="stat-value" id="stat-matches" aria-live="off">0 / 20</span>
+    </span>
+    <span class="stat attempts" title="Attempts">
+      <span class="stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ic-loop-bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fb923c"/>
+              <stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <rect x="1.5" y="1.5" width="21" height="21" rx="5.5" fill="url(#ic-loop-bg)" stroke="#9a3412" stroke-width="0.6"/>
+          <path d="M7 10 A5 5 0 0 1 16 9 L17.5 9 L15 6 L12.5 9 L14.5 9 A4 4 0 0 0 8 10 Z" fill="#f8fafc"/>
+          <path d="M17 14 A5 5 0 0 1 8 15 L6.5 15 L9 18 L11.5 15 L9.5 15 A4 4 0 0 0 16 14 Z" fill="#f8fafc"/>
+        </svg>
+      </span>
+      <span class="stat-label">Attempts</span>
+      <span class="stat-value" id="stat-attempts" aria-live="off">0</span>
+    </span>
+    <span class="stat score" title="Score">
+      <span class="stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ic-star-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fde047"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+            </linearGradient>
+          </defs>
+          <path d="M12 2.4 L14.85 8.55 L21.6 9.42 L16.65 14.04 L17.93 20.7 L12 17.4 L6.07 20.7 L7.35 14.04 L2.4 9.42 L9.15 8.55 Z"
+                fill="url(#ic-star-fill)" stroke="#b45309" stroke-width="0.7" stroke-linejoin="round"/>
+          <path d="M12 4.6 L13.9 8.7 L11 12.5 Z" fill="rgba(255,255,255,0.45)"/>
+        </svg>
+      </span>
+      <span class="stat-label">Score</span>
+      <span class="stat-value" id="stat-score" aria-live="off">0</span>
+    </span>
+    <button class="icon-btn" id="btn-restart" type="button" aria-label="Restart game" title="Restart">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/>
+        <path d="M3.5 4v5h5"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ===== Board ===== -->
+<main class="panel" aria-label="Game board">
+  <div class="board" id="board" role="grid" aria-label="60 tiles, find every triplet"></div>
+</main>
+
+<!-- ===== Match Modal ===== -->
+<div class="overlay" id="match-overlay" role="presentation">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="match-title" aria-describedby="match-fact">
+    <h2 id="match-title">Nice match!</h2>
+    <div class="match-icon" id="match-icon" aria-hidden="true">🏙️</div>
+    <div class="match-name" id="match-name">—</div>
+    <p class="match-fact" id="match-fact">—</p>
+    <div class="modal-buttons">
+      <button class="btn btn-primary" id="btn-continue" type="button">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Confirm Restart ===== -->
+<div class="overlay" id="confirm-overlay" role="presentation">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <h2 id="confirm-title">Restart game?</h2>
+    <p class="confirm-body">Your current progress will be lost.</p>
+    <div class="modal-buttons">
+      <button class="btn btn-ghost" id="btn-cancel-restart" type="button">Cancel</button>
+      <button class="btn btn-primary" id="btn-confirm-restart" type="button">Restart</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Loading Screen (initial) ===== -->
+<div class="overlay loading-overlay is-visible" id="loading-overlay" role="presentation">
+  <div class="loading-card" role="status" aria-live="polite" aria-label="Loading Triplet Match">
+    <div class="loading-logo" aria-hidden="true">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6"  y="14" width="11" height="14" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5" transform="rotate(-8 11.5 21)"/>
+        <rect x="18.5" y="11" width="11" height="14" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5"/>
+        <rect x="31" y="14" width="11" height="14" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5" transform="rotate(8 36.5 21)"/>
+        <circle cx="11.5" cy="21" r="2.4" fill="#dc2626"/>
+        <circle cx="24"   cy="18" r="2.4" fill="#dc2626"/>
+        <circle cx="36.5" cy="21" r="2.4" fill="#dc2626"/>
+      </svg>
+    </div>
+    <h1 class="loading-title">Triplet Match</h1>
+    <p class="loading-tagline">A City Memory Game</p>
+    <div class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- ===== Main Menu ===== -->
+<div class="overlay start-screen" id="start-overlay" role="presentation">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="start-title">
+    <span class="badge">A CITY MEMORY GAME</span>
+    <h1 id="start-title">Triplet Match</h1>
+    <div class="modal-buttons">
+      <button class="btn btn-primary" id="btn-start" type="button">Play</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Win Screen ===== -->
+<div class="overlay" id="win-overlay" role="presentation">
+  <div class="modal win-modal" role="dialog" aria-modal="true" aria-labelledby="win-title">
+    <span class="badge">VICTORY</span>
+    <h2 id="win-title">You found every triplet!</h2>
+    <p class="confirm-body">A perfect sweep of the city.</p>
+    <div class="win-stats" id="win-stats"></div>
+    <div class="modal-buttons">
+      <button class="btn btn-ghost" id="btn-win-close" type="button">Close</button>
+      <button class="btn btn-primary" id="btn-play-again" type="button">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+<script>
+'use strict';
+
+/* =========================================================
+   Triplet Match — Application Script
+   Modules:
+     Data            — the 20 city objects
+     Animator        — Promise-based timing helpers
+     GameState       — state machine + counters
+     Board           — DOM construction + shuffle
+     UI              — HUD, modals, win screen
+     TurnController  — click handling, turn flow
+     Confetti        — lightweight canvas burst
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Data — 20 city-themed objects (icon, name, color, fact)
+   --------------------------------------------------------- */
+const Data = (() => {
+  const OBJECTS = [
+    { id: 'traffic-light', name: 'Traffic Light', icon: '🚦', color: '#ef4444',
+      fact: 'Traffic lights coordinate the right of way at intersections. The standard red-amber-green pattern dates back to the early 1900s and is recognized in nearly every country today.' },
+    { id: 'bus-stop', name: 'Bus Stop', icon: '🚏', color: '#3b82f6',
+      fact: 'A bus stop marks where buses pause to pick up passengers. Modern stops often include shelters, route maps, and real-time arrival displays for riders.' },
+    { id: 'hospital', name: 'Hospital', icon: '🏥', color: '#f87171',
+      fact: 'Hospitals provide medical care around the clock. They are usually marked with a red cross or crescent so people can spot them quickly in an emergency.' },
+    { id: 'fountain', name: 'Fountain', icon: '⛲', color: '#06b6d4',
+      fact: 'Fountains began as practical sources of drinking water in ancient cities. Today they are mostly decorative, cooling the air on warm days in public squares.' },
+    { id: 'bench', name: 'Park Bench', icon: '🪑', color: '#a16207',
+      fact: 'Park benches give walkers a place to rest and watch the world go by. Most are made from weather-resistant wood, metal, or recycled plastic to last for years.' },
+    { id: 'hydrant', name: 'Fire Hydrant', icon: '🧯', color: '#dc2626',
+      fact: 'Fire hydrants connect directly to the city water main. Firefighters can attach hoses in seconds, giving them a powerful, on-demand water supply.' },
+    { id: 'stop-sign', name: 'Stop Sign', icon: '🛑', color: '#b91c1c',
+      fact: 'The eight-sided red stop sign is recognized worldwide. Its unusual shape lets drivers identify it from behind, even when the front is hidden.' },
+    { id: 'skyscraper', name: 'Skyscraper', icon: '🏙️', color: '#64748b',
+      fact: 'Skyscrapers became possible thanks to steel frames and the safety elevator. Cities build upward to fit more people and offices onto valuable land.' },
+    { id: 'apartment', name: 'Apartment Block', icon: '🏢', color: '#22c55e',
+      fact: 'Apartment blocks stack many homes into a single building. They make efficient use of space and let neighbors share walls, stairs, and utilities.' },
+    { id: 'crosswalk', name: 'Crosswalk', icon: '🚸', color: '#facc15',
+      fact: 'Crosswalks are painted zones where pedestrians have the right of way. The bold white stripes are designed to be highly visible to approaching drivers.' },
+    { id: 'lamp', name: 'Street Lamp', icon: '💡', color: '#fbbf24',
+      fact: 'Street lamps light up roads and sidewalks after sunset. Most modern lamps use LEDs, which last for years and use far less electricity than older bulbs.' },
+    { id: 'tree', name: 'Tree', icon: '🌳', color: '#16a34a',
+      fact: 'Trees in cities cool the streets, clean the air, and shelter birds. A single mature tree can produce enough oxygen for a small family in a year.' },
+    { id: 'trash', name: 'Trash Bin', icon: '🗑️', color: '#525252',
+      fact: 'Public trash bins keep streets clean and pests away. Many cities now place recycling bins next to them so people can sort their waste on the go.' },
+    { id: 'taxi', name: 'Taxi', icon: '🚕', color: '#eab308',
+      fact: 'Taxis are short-trip vehicles for hire. The bright yellow color used in many cities was chosen because it stands out from other traffic at a distance.' },
+    { id: 'bicycle', name: 'Bicycle', icon: '🚲', color: '#0ea5e9',
+      fact: 'Bicycles are one of the most efficient ways to travel using only human power. They produce no pollution and need very little space to park.' },
+    { id: 'cone', name: 'Traffic Cone', icon: '🚧', color: '#f97316',
+      fact: 'Traffic cones warn drivers about hazards or road work. Their bright orange color and reflective stripes make them easy to see in any weather.' },
+    { id: 'mailbox', name: 'Mailbox', icon: '📮', color: '#2563eb',
+      fact: 'Mailboxes let people send letters without visiting the post office. Collection times are printed on the side so senders know when their mail will leave.' },
+    { id: 'manhole', name: 'Manhole Cover', icon: '⚙️', color: '#374151',
+      fact: 'Manhole covers seal access points to pipes and cables beneath the street. They are usually round so they cannot fall through the opening they protect.' },
+    { id: 'newsstand', name: 'Newspaper Stand', icon: '📰', color: '#7c3aed',
+      fact: 'Newspaper stands once dotted nearly every busy corner. They still sell papers and snacks in many cities, even as more readers move to phones and tablets.' },
+    { id: 'pigeon', name: 'Pigeon', icon: '🕊️', color: '#94a3b8',
+      fact: 'Pigeons thrive in cities because tall buildings mimic the cliffs their ancestors lived on. They can find their way home from hundreds of kilometers away.' },
+  ];
+  return { OBJECTS };
+})();
+
+/* ---------------------------------------------------------
+   Animator — Promise-based wait + reduced-motion detect
+   --------------------------------------------------------- */
+const Animator = (() => {
+  const prefersReducedMotion = () =>
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const pendingTimeouts = new Set();
+
+  function wait(ms) {
+    return new Promise((resolve) => {
+      const t = setTimeout(() => {
+        pendingTimeouts.delete(t);
+        resolve();
+      }, ms);
+      pendingTimeouts.add(t);
+    });
+  }
+
+  function clearAllTimeouts() {
+    for (const t of pendingTimeouts) clearTimeout(t);
+    pendingTimeouts.clear();
+  }
+
+  return { wait, clearAllTimeouts, prefersReducedMotion };
+})();
+
+/* ---------------------------------------------------------
+   GameState — explicit state machine
+   States: IDLE | FLIPPING | EVALUATING | MODAL_OPEN | WON
+   --------------------------------------------------------- */
+const GameState = (() => {
+  const state = {
+    phase: 'IDLE',
+    revealed: [],          // tile indices revealed this turn
+    matches: 0,
+    attempts: 0,
+    streak: 0,
+    longestStreak: 0,
+    score: 0,
+    startTime: null,
+    elapsedMs: 0,
+    finalElapsedMs: 0,
+    timerHandle: null,
+  };
+
+  function reset() {
+    state.phase = 'IDLE';
+    state.revealed = [];
+    state.matches = 0;
+    state.attempts = 0;
+    state.streak = 0;
+    state.longestStreak = 0;
+    state.score = 0;
+    state.startTime = null;
+    state.elapsedMs = 0;
+    state.finalElapsedMs = 0;
+    stopTimer();
+  }
+
+  function startTimerIfNeeded(onTick) {
+    if (state.startTime !== null) return;
+    state.startTime = Date.now();
+    state.timerHandle = setInterval(() => {
+      state.elapsedMs = Date.now() - state.startTime;
+      if (onTick) onTick(state.elapsedMs);
+    }, 250);
+  }
+
+  function stopTimer() {
+    if (state.timerHandle) {
+      clearInterval(state.timerHandle);
+      state.timerHandle = null;
+    }
+  }
+
+  function freezeTimer() {
+    if (state.startTime !== null) {
+      state.finalElapsedMs = Date.now() - state.startTime;
+    }
+    stopTimer();
+  }
+
+  return { state, reset, startTimerIfNeeded, stopTimer, freezeTimer };
+})();
+
+/* ---------------------------------------------------------
+   Board — builds tile DOM, shuffles, exposes tile lookup
+   --------------------------------------------------------- */
+const Board = (() => {
+  const BOARD_SIZE = 60;
+  const COPIES_PER_OBJECT = 3;
+
+  const boardEl = document.getElementById('board');
+  let tiles = []; // { index, objectId, el }
+
+  function fisherYatesShuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function buildAssignments() {
+    const ids = [];
+    for (const obj of Data.OBJECTS) {
+      for (let c = 0; c < COPIES_PER_OBJECT; c++) ids.push(obj.id);
+    }
+    return fisherYatesShuffle(ids);
+  }
+
+  function render() {
+    boardEl.innerHTML = '';
+    boardEl.classList.remove('is-locked');
+    tiles = [];
+
+    const assignments = buildAssignments();
+    const frag = document.createDocumentFragment();
+
+    for (let i = 0; i < BOARD_SIZE; i++) {
+      const objectId = assignments[i];
+      const obj = Data.OBJECTS.find((o) => o.id === objectId);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tile';
+      btn.dataset.index = String(i);
+      btn.dataset.objectId = objectId;
+      btn.setAttribute('role', 'gridcell');
+      btn.setAttribute('aria-label', `Tile ${i + 1}, face down`);
+
+      btn.innerHTML = `
+        <div class="tile-inner">
+          <div class="tile-face tile-back">
+            <div class="tile-number">${String(i + 1).padStart(2, '0')}</div>
+          </div>
+          <div class="tile-face tile-front" style="--object-color: ${obj.color}">
+            <div class="top-bar"></div>
+            <div class="icon" aria-hidden="true">${obj.icon}</div>
+            <div class="name">${obj.name}</div>
+          </div>
+        </div>
+      `;
+
+      frag.appendChild(btn);
+      tiles.push({ index: i, objectId, el: btn });
+    }
+
+    boardEl.appendChild(frag);
+  }
+
+  function getTile(index) { return tiles[index]; }
+  function getAllTiles() { return tiles; }
+  function setLocked(locked) { boardEl.classList.toggle('is-locked', !!locked); }
+  function getBoardEl() { return boardEl; }
+
+  return { render, getTile, getAllTiles, setLocked, getBoardEl, BOARD_SIZE };
+})();
+
+/* ---------------------------------------------------------
+   UI — HUD updates, modal show/hide, focus trap, win screen
+   --------------------------------------------------------- */
+const UI = (() => {
+  const timerEl = document.getElementById('stat-timer');
+  const matchesEl = document.getElementById('stat-matches');
+  const attemptsEl = document.getElementById('stat-attempts');
+  const scoreEl = document.getElementById('stat-score');
+
+  const matchOverlay = document.getElementById('match-overlay');
+  const matchTitle = document.getElementById('match-title');
+  const matchIcon = document.getElementById('match-icon');
+  const matchName = document.getElementById('match-name');
+  const matchFact = document.getElementById('match-fact');
+  const btnContinue = document.getElementById('btn-continue');
+
+  const confirmOverlay = document.getElementById('confirm-overlay');
+  const btnCancelRestart = document.getElementById('btn-cancel-restart');
+  const btnConfirmRestart = document.getElementById('btn-confirm-restart');
+
+  const startOverlay = document.getElementById('start-overlay');
+  const btnStart = document.getElementById('btn-start');
+
+  const winOverlay = document.getElementById('win-overlay');
+  const winStatsEl = document.getElementById('win-stats');
+  const btnPlayAgain = document.getElementById('btn-play-again');
+  const btnWinClose = document.getElementById('btn-win-close');
+
+  const TITLES = ['Nice match!', 'Triplet found!', 'Three of a kind!', 'Perfect spot!', 'You found it!'];
+
+  let lastFocusedBeforeModal = null;
+  let focusTrapHandler = null;
+
+  function formatTime(ms) {
+    const totalSec = Math.floor(ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function pulse(el) {
+    el.classList.remove('pulse');
+    // restart animation
+    void el.offsetWidth;
+    el.classList.add('pulse');
+  }
+
+  function renderHUD() {
+    const s = GameState.state;
+    timerEl.textContent = formatTime(s.elapsedMs);
+    const newMatches = `${s.matches} / 20`;
+    if (matchesEl.textContent !== newMatches) {
+      matchesEl.textContent = newMatches;
+      pulse(matchesEl);
+    }
+    const newAttempts = String(s.attempts);
+    if (attemptsEl.textContent !== newAttempts) {
+      attemptsEl.textContent = newAttempts;
+      pulse(attemptsEl);
+    }
+    const newScore = String(s.score);
+    if (scoreEl.textContent !== newScore) {
+      scoreEl.textContent = newScore;
+      pulse(scoreEl);
+    }
+  }
+
+  function tickTimer() {
+    timerEl.textContent = formatTime(GameState.state.elapsedMs);
+  }
+
+  function trapFocus(overlay) {
+    const focusables = overlay.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables.length === 0) return null;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    const handler = (e) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    overlay.addEventListener('keydown', handler);
+    return handler;
+  }
+
+  function openOverlay(overlay, focusEl) {
+    lastFocusedBeforeModal = document.activeElement;
+    overlay.classList.remove('exiting');
+    overlay.classList.add('is-visible');
+    if (focusEl) {
+      requestAnimationFrame(() => focusEl.focus());
+    }
+    focusTrapHandler = trapFocus(overlay);
+  }
+
+  function closeOverlay(overlay) {
+    return new Promise((resolve) => {
+      if (focusTrapHandler) {
+        overlay.removeEventListener('keydown', focusTrapHandler);
+        focusTrapHandler = null;
+      }
+      overlay.classList.add('exiting');
+      overlay.classList.remove('is-visible');
+      setTimeout(() => {
+        overlay.classList.remove('exiting');
+        if (lastFocusedBeforeModal && document.body.contains(lastFocusedBeforeModal)) {
+          lastFocusedBeforeModal.focus();
+        }
+        resolve();
+      }, 200);
+    });
+  }
+
+  function showMatchModal(obj) {
+    matchTitle.textContent = TITLES[Math.floor(Math.random() * TITLES.length)];
+    matchIcon.textContent = obj.icon;
+    matchName.textContent = obj.name;
+    matchFact.textContent = obj.fact;
+    return new Promise((resolve) => {
+      openOverlay(matchOverlay, btnContinue);
+      const handler = async () => {
+        btnContinue.removeEventListener('click', handler);
+        await closeOverlay(matchOverlay);
+        resolve();
+      };
+      btnContinue.addEventListener('click', handler);
+    });
+  }
+
+  function showConfirmRestart() {
+    return new Promise((resolve) => {
+      openOverlay(confirmOverlay, btnCancelRestart);
+      const cancel = async () => {
+        cleanup();
+        await closeOverlay(confirmOverlay);
+        resolve(false);
+      };
+      const confirm = async () => {
+        cleanup();
+        await closeOverlay(confirmOverlay);
+        resolve(true);
+      };
+      function cleanup() {
+        btnCancelRestart.removeEventListener('click', cancel);
+        btnConfirmRestart.removeEventListener('click', confirm);
+      }
+      btnCancelRestart.addEventListener('click', cancel);
+      btnConfirmRestart.addEventListener('click', confirm);
+    });
+  }
+
+  function showStart() {
+    return new Promise((resolve) => {
+      openOverlay(startOverlay, btnStart);
+      const handler = async () => {
+        btnStart.removeEventListener('click', handler);
+        await closeOverlay(startOverlay);
+        resolve();
+      };
+      btnStart.addEventListener('click', handler);
+    });
+  }
+
+  function showWin({ onPlayAgain, onClose }) {
+    const s = GameState.state;
+    const accuracy = s.attempts > 0 ? Math.round((s.matches / s.attempts) * 100) : 100;
+    winStatsEl.innerHTML = `
+      <div class="win-stat"><span class="label">Time</span><span class="value">${formatTime(s.finalElapsedMs || s.elapsedMs)}</span></div>
+      <div class="win-stat"><span class="label">Attempts</span><span class="value">${s.attempts}</span></div>
+      <div class="win-stat"><span class="label">Accuracy</span><span class="value">${accuracy}%</span></div>
+      <div class="win-stat"><span class="label">Score</span><span class="value">${s.score}</span></div>
+      <div class="win-stat" style="grid-column: span 2;"><span class="label">Longest Streak</span><span class="value">${s.longestStreak}</span></div>
+    `;
+    openOverlay(winOverlay, btnPlayAgain);
+
+    const again = async () => {
+      cleanup();
+      await closeOverlay(winOverlay);
+      onPlayAgain && onPlayAgain();
+    };
+    const close = async () => {
+      cleanup();
+      await closeOverlay(winOverlay);
+      onClose && onClose();
+    };
+    function cleanup() {
+      btnPlayAgain.removeEventListener('click', again);
+      btnWinClose.removeEventListener('click', close);
+    }
+    btnPlayAgain.addEventListener('click', again);
+    btnWinClose.addEventListener('click', close);
+  }
+
+  return { renderHUD, tickTimer, showMatchModal, showConfirmRestart, showStart, showWin, formatTime };
+})();
+
+/* ---------------------------------------------------------
+   Confetti — lightweight canvas burst, 4s
+   --------------------------------------------------------- */
+const Confetti = (() => {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let rafId = null;
+  let startedAt = 0;
+  let dpr = 1;
+
+  function sizeCanvas() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function spawn(count) {
+    const colors = ['#F59E0B', '#10B981', '#3b82f6', '#ef4444', '#a855f7', '#facc15', '#06b6d4'];
+    const W = window.innerWidth;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: W * Math.random(),
+        y: -20 - Math.random() * 200,
+        vx: (Math.random() - 0.5) * 3,
+        vy: 2 + Math.random() * 3,
+        size: 4 + Math.random() * 6,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.3,
+        color: colors[(Math.random() * colors.length) | 0],
+        shape: Math.random() < 0.5 ? 'rect' : 'circle',
+      });
+    }
+  }
+
+  function step(now) {
+    const elapsed = now - startedAt;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // continue spawning during first ~2s
+    if (elapsed < 2000 && particles.length < 220) {
+      spawn(6);
+    }
+
+    const H = window.innerHeight;
+    for (const p of particles) {
+      p.vy += 0.04; // mild gravity
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'rect') {
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    particles = particles.filter((p) => p.y < H + 40);
+
+    if (elapsed < 4000 || particles.length > 0) {
+      rafId = requestAnimationFrame(step);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      rafId = null;
+    }
+  }
+
+  function start() {
+    if (Animator.prefersReducedMotion()) return;
+    stop();
+    sizeCanvas();
+    particles = [];
+    spawn(80);
+    startedAt = performance.now();
+    rafId = requestAnimationFrame(step);
+  }
+
+  function stop() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    particles = [];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  window.addEventListener('resize', () => {
+    if (rafId) sizeCanvas();
+  });
+
+  return { start, stop };
+})();
+
+/* ---------------------------------------------------------
+   TurnController — click handling + turn flow
+   --------------------------------------------------------- */
+const TurnController = (() => {
+  const TILES_PER_TURN = 3;
+  const MISMATCH_VIEW_MS = 1200;
+
+  function flipUp(tile) {
+    tile.el.classList.add('is-flipped');
+    const obj = Data.OBJECTS.find((o) => o.id === tile.objectId);
+    tile.el.setAttribute('aria-label', `Tile ${tile.index + 1}, face up showing ${obj.name}`);
+  }
+
+  function flipDown(tile) {
+    tile.el.classList.remove('is-flipped');
+    tile.el.setAttribute('aria-label', `Tile ${tile.index + 1}, face down`);
+  }
+
+  async function onTileClick(tile) {
+    const s = GameState.state;
+
+    if (s.phase !== 'IDLE' && s.phase !== 'FLIPPING') return;
+    if (tile.el.classList.contains('is-flipped')) return;
+    if (tile.el.classList.contains('is-matched')) return;
+    if (s.revealed.includes(tile.index)) return;
+
+    GameState.startTimerIfNeeded(() => UI.tickTimer());
+
+    s.phase = 'FLIPPING';
+    s.revealed.push(tile.index);
+    flipUp(tile);
+
+    if (s.revealed.length < TILES_PER_TURN) {
+      // wait for the flip to actually start before unlocking next click
+      await Animator.wait(60);
+      // Allow next click while this one finishes flipping
+      if (s.revealed.length < TILES_PER_TURN) {
+        s.phase = 'IDLE';
+      }
+      return;
+    }
+
+    // Third tile flipped — evaluate
+    await evaluateTurn();
+  }
+
+  async function evaluateTurn() {
+    const s = GameState.state;
+    s.phase = 'EVALUATING';
+    Board.setLocked(true);
+
+    // Wait for flip animation to complete before showing modal/shake
+    await Animator.wait(Animator.prefersReducedMotion() ? 100 : 560);
+
+    const revealedTiles = s.revealed.map((idx) => Board.getTile(idx));
+    const allMatch = revealedTiles.every((t) => t.objectId === revealedTiles[0].objectId);
+
+    s.attempts += 1;
+
+    if (allMatch) {
+      await handleMatch(revealedTiles);
+    } else {
+      await handleMismatch(revealedTiles);
+    }
+
+    s.revealed = [];
+
+    if (s.matches >= Data.OBJECTS.length) {
+      s.phase = 'WON';
+      GameState.freezeTimer();
+      Board.setLocked(true);
+      await Animator.wait(300);
+      await triggerWin();
+    } else {
+      s.phase = 'IDLE';
+      Board.setLocked(false);
+    }
+  }
+
+  async function handleMatch(revealedTiles) {
+    const s = GameState.state;
+    s.streak += 1;
+    if (s.streak > s.longestStreak) s.longestStreak = s.streak;
+    s.matches += 1;
+
+    const streakBonus = 50 * Math.max(0, s.streak - 1);
+    s.score += 100 + streakBonus;
+
+    // Match success animation
+    for (const t of revealedTiles) {
+      t.el.classList.add('is-matched-anim');
+    }
+
+    UI.renderHUD();
+
+    await Animator.wait(Animator.prefersReducedMotion() ? 120 : 720);
+
+    for (const t of revealedTiles) {
+      t.el.classList.add('is-matched');
+      t.el.classList.remove('is-matched-anim');
+      t.el.setAttribute('aria-label', `Tile ${t.index + 1}, matched`);
+      t.el.setAttribute('tabindex', '-1');
+    }
+
+    if (s.matches < Data.OBJECTS.length) {
+      const obj = Data.OBJECTS.find((o) => o.id === revealedTiles[0].objectId);
+      s.phase = 'MODAL_OPEN';
+      await UI.showMatchModal(obj);
+    }
+  }
+
+  async function handleMismatch(revealedTiles) {
+    GameState.state.streak = 0;
+    UI.renderHUD();
+
+    await Animator.wait(MISMATCH_VIEW_MS);
+
+    for (const t of revealedTiles) {
+      t.el.classList.add('is-shake');
+      flipDown(t);
+    }
+    await Animator.wait(Animator.prefersReducedMotion() ? 100 : 470);
+    for (const t of revealedTiles) {
+      t.el.classList.remove('is-shake');
+    }
+  }
+
+  async function triggerWin() {
+    Confetti.start();
+    UI.showWin({
+      onPlayAgain: () => App.newGame(),
+      onClose: () => Confetti.stop(),
+    });
+  }
+
+  function bind() {
+    const boardEl = Board.getBoardEl();
+    boardEl.addEventListener('click', (e) => {
+      const tileEl = e.target.closest('.tile');
+      if (!tileEl || !boardEl.contains(tileEl)) return;
+      const index = Number(tileEl.dataset.index);
+      const tile = Board.getTile(index);
+      if (tile) onTileClick(tile);
+    });
+
+    boardEl.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const tileEl = e.target.closest('.tile');
+      if (!tileEl) return;
+      // Buttons natively activate on Enter/Space; click handler picks it up.
+    });
+  }
+
+  return { bind };
+})();
+
+/* ---------------------------------------------------------
+   App — bootstrap, wire restart button
+   --------------------------------------------------------- */
+const App = (() => {
+  function newGame() {
+    Animator.clearAllTimeouts();
+    Confetti.stop();
+    GameState.reset();
+    Board.render();
+    UI.renderHUD();
+    UI.tickTimer();
+  }
+
+  async function handleRestartClick() {
+    const s = GameState.state;
+    const gameInProgress = s.matches > 0 || s.revealed.length > 0 || s.attempts > 0;
+    if (gameInProgress && s.phase !== 'WON') {
+      const confirmed = await UI.showConfirmRestart();
+      if (!confirmed) return;
+    }
+    newGame();
+  }
+
+  function hideLoadingScreen() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    return new Promise((resolve) => {
+      loadingOverlay.classList.add('exiting');
+      loadingOverlay.classList.remove('is-visible');
+      setTimeout(() => {
+        loadingOverlay.remove();
+        resolve();
+      }, 320);
+    });
+  }
+
+  async function bootstrap() {
+    TurnController.bind();
+    document.getElementById('btn-restart').addEventListener('click', handleRestartClick);
+
+    // Render an initial faded board behind the menus for visual context
+    Board.render();
+    UI.renderHUD();
+
+    // Initial loading screen — fixed 3 seconds, then main menu.
+    await Animator.wait(3000);
+    await hideLoadingScreen();
+
+    await UI.showStart();
+    newGame();
+  }
+
+  return { bootstrap, newGame };
+})();
+
+// Expose a tiny debug namespace, nothing more.
+window.TripletMatch = { App, GameState, Board, Data };
+
+document.addEventListener('DOMContentLoaded', () => {
+  App.bootstrap();
+});
+</script>
+
+</body>
+</html>
