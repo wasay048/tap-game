@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Triplet Match — A City Memory Game</title>
+<title>The Saikat Shuffle — A City Memory Game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
 <style>
   /* =========================================================
-     Triplet Match — Stylesheet
+     The Saikat Shuffle — Stylesheet
      - Layout, theming, tile 3D flip, animations, responsive
      ========================================================= */
 
@@ -286,7 +286,7 @@
     background:
       linear-gradient(180deg, var(--paper) 0%, var(--paper-dark) 100%);
     color: #2d2418;
-    padding: 6px;
+    padding: 6px 4px 4px;
   }
   .tile-front .top-bar {
     position: absolute;
@@ -295,20 +295,22 @@
     background: var(--object-color, #94a3b8);
   }
   .tile-front .icon {
-    font-size: clamp(28px, 4vw, 44px);
-    line-height: 1;
-    margin-top: 6px;
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+    width: 86%;
+    height: 62%;
+    object-fit: contain;
+    margin-top: 8px;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+    display: block;
   }
   .tile-front .name {
-    margin-top: 6px;
-    font-size: clamp(8px, 0.9vw, 11px);
+    margin-top: 4px;
+    font-size: clamp(7px, 0.78vw, 10px);
     font-weight: 700;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.4px;
     text-transform: uppercase;
     color: #4a3a1c;
     text-align: center;
-    line-height: 1.1;
+    line-height: 1.12;
     padding: 0 2px;
   }
 
@@ -408,11 +410,12 @@
     letter-spacing: 0.2px;
   }
   .modal .match-icon {
-    font-size: 72px;
-    line-height: 1;
-    margin: 12px 0 10px;
-    display: inline-block;
-    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.4));
+    display: block;
+    margin: 12px auto 10px;
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
   }
   .modal .match-name {
     font-size: 18px;
@@ -619,7 +622,7 @@
     .stat .stat-label { font-size: 9px; letter-spacing: 0.8px; }
     .panel { padding: 14px; border-radius: 18px; }
     .board {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(8, minmax(0, 1fr));
       gap: 8px;
     }
   }
@@ -633,7 +636,7 @@
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 6px;
     }
-    .tile-front .name { font-size: 8px; letter-spacing: 0.3px; }
+    .tile-front .name { font-size: 7px; letter-spacing: 0.2px; }
   }
 
   /* ===== Reduced motion ===== */
@@ -662,7 +665,7 @@
 <header class="hud" aria-label="Game status">
   <div class="hud-title">
     <span class="logo-dot" aria-hidden="true"></span>
-    Triplet Match
+    The Saikat Shuffle
   </div>
   <div class="hud-stats" role="group" aria-label="Game statistics">
     <span class="stat timer" title="Elapsed time">
@@ -750,14 +753,14 @@
 
 <!-- ===== Board ===== -->
 <main class="panel" aria-label="Game board">
-  <div class="board" id="board" role="grid" aria-label="60 tiles, find every triplet"></div>
+  <div class="board" id="board" role="grid" aria-label="40 tiles, find every pair"></div>
 </main>
 
 <!-- ===== Match Modal ===== -->
 <div class="overlay" id="match-overlay" role="presentation">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="match-title" aria-describedby="match-fact">
     <h2 id="match-title">Nice match!</h2>
-    <div class="match-icon" id="match-icon" aria-hidden="true">🏙️</div>
+    <img class="match-icon" id="match-icon" alt="" />
     <div class="match-name" id="match-name">—</div>
     <p class="match-fact" id="match-fact">—</p>
     <div class="modal-buttons">
@@ -780,18 +783,16 @@
 
 <!-- ===== Loading Screen (initial) ===== -->
 <div class="overlay loading-overlay is-visible" id="loading-overlay" role="presentation">
-  <div class="loading-card" role="status" aria-live="polite" aria-label="Loading Triplet Match">
+  <div class="loading-card" role="status" aria-live="polite" aria-label="Loading The Saikat Shuffle">
     <div class="loading-logo" aria-hidden="true">
       <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-        <rect x="6"  y="14" width="11" height="14" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5" transform="rotate(-8 11.5 21)"/>
-        <rect x="18.5" y="11" width="11" height="14" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5"/>
-        <rect x="31" y="14" width="11" height="14" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5" transform="rotate(8 36.5 21)"/>
-        <circle cx="11.5" cy="21" r="2.4" fill="#dc2626"/>
-        <circle cx="24"   cy="18" r="2.4" fill="#dc2626"/>
-        <circle cx="36.5" cy="21" r="2.4" fill="#dc2626"/>
+        <rect x="9"  y="13" width="13" height="16" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5" transform="rotate(-8 15.5 21)"/>
+        <rect x="26" y="13" width="13" height="16" rx="2.5" fill="#fff7ed" stroke="#7c2d12" stroke-width="1.5" transform="rotate(8 32.5 21)"/>
+        <circle cx="15.5" cy="21" r="2.6" fill="#dc2626"/>
+        <circle cx="32.5" cy="21" r="2.6" fill="#dc2626"/>
       </svg>
     </div>
-    <h1 class="loading-title">Triplet Match</h1>
+    <h1 class="loading-title">The Saikat Shuffle</h1>
     <p class="loading-tagline">A City Memory Game</p>
     <div class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></div>
   </div>
@@ -801,7 +802,7 @@
 <div class="overlay start-screen" id="start-overlay" role="presentation">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="start-title">
     <span class="badge">A CITY MEMORY GAME</span>
-    <h1 id="start-title">Triplet Match</h1>
+    <h1 id="start-title">The Saikat Shuffle</h1>
     <div class="modal-buttons">
       <button class="btn btn-primary" id="btn-start" type="button">Play</button>
     </div>
@@ -812,7 +813,7 @@
 <div class="overlay" id="win-overlay" role="presentation">
   <div class="modal win-modal" role="dialog" aria-modal="true" aria-labelledby="win-title">
     <span class="badge">VICTORY</span>
-    <h2 id="win-title">You found every triplet!</h2>
+    <h2 id="win-title">You found every pair!</h2>
     <p class="confirm-body">A perfect sweep of the city.</p>
     <div class="win-stats" id="win-stats"></div>
     <div class="modal-buttons">
@@ -828,7 +829,7 @@
 'use strict';
 
 /* =========================================================
-   Triplet Match — Application Script
+   The Saikat Shuffle — Application Script
    Modules:
      Data            — the 20 city objects
      Animator        — Promise-based timing helpers
@@ -840,50 +841,51 @@
    ========================================================= */
 
 /* ---------------------------------------------------------
-   Data — 20 city-themed objects (icon, name, color, fact)
+   Data — 20 city-themed objects (image, name, color, fact)
    --------------------------------------------------------- */
 const Data = (() => {
+  const ASSETS = 'assets/';
   const OBJECTS = [
-    { id: 'traffic-light', name: 'Traffic Light', icon: '🚦', color: '#ef4444',
-      fact: 'Traffic lights coordinate the right of way at intersections. The standard red-amber-green pattern dates back to the early 1900s and is recognized in nearly every country today.' },
-    { id: 'bus-stop', name: 'Bus Stop', icon: '🚏', color: '#3b82f6',
-      fact: 'A bus stop marks where buses pause to pick up passengers. Modern stops often include shelters, route maps, and real-time arrival displays for riders.' },
-    { id: 'hospital', name: 'Hospital', icon: '🏥', color: '#f87171',
-      fact: 'Hospitals provide medical care around the clock. They are usually marked with a red cross or crescent so people can spot them quickly in an emergency.' },
-    { id: 'fountain', name: 'Fountain', icon: '⛲', color: '#06b6d4',
-      fact: 'Fountains began as practical sources of drinking water in ancient cities. Today they are mostly decorative, cooling the air on warm days in public squares.' },
-    { id: 'bench', name: 'Park Bench', icon: '🪑', color: '#a16207',
-      fact: 'Park benches give walkers a place to rest and watch the world go by. Most are made from weather-resistant wood, metal, or recycled plastic to last for years.' },
-    { id: 'hydrant', name: 'Fire Hydrant', icon: '🧯', color: '#dc2626',
-      fact: 'Fire hydrants connect directly to the city water main. Firefighters can attach hoses in seconds, giving them a powerful, on-demand water supply.' },
-    { id: 'stop-sign', name: 'Stop Sign', icon: '🛑', color: '#b91c1c',
-      fact: 'The eight-sided red stop sign is recognized worldwide. Its unusual shape lets drivers identify it from behind, even when the front is hidden.' },
-    { id: 'skyscraper', name: 'Skyscraper', icon: '🏙️', color: '#64748b',
-      fact: 'Skyscrapers became possible thanks to steel frames and the safety elevator. Cities build upward to fit more people and offices onto valuable land.' },
-    { id: 'apartment', name: 'Apartment Block', icon: '🏢', color: '#22c55e',
-      fact: 'Apartment blocks stack many homes into a single building. They make efficient use of space and let neighbors share walls, stairs, and utilities.' },
-    { id: 'crosswalk', name: 'Crosswalk', icon: '🚸', color: '#facc15',
-      fact: 'Crosswalks are painted zones where pedestrians have the right of way. The bold white stripes are designed to be highly visible to approaching drivers.' },
-    { id: 'lamp', name: 'Street Lamp', icon: '💡', color: '#fbbf24',
-      fact: 'Street lamps light up roads and sidewalks after sunset. Most modern lamps use LEDs, which last for years and use far less electricity than older bulbs.' },
-    { id: 'tree', name: 'Tree', icon: '🌳', color: '#16a34a',
-      fact: 'Trees in cities cool the streets, clean the air, and shelter birds. A single mature tree can produce enough oxygen for a small family in a year.' },
-    { id: 'trash', name: 'Trash Bin', icon: '🗑️', color: '#525252',
-      fact: 'Public trash bins keep streets clean and pests away. Many cities now place recycling bins next to them so people can sort their waste on the go.' },
-    { id: 'taxi', name: 'Taxi', icon: '🚕', color: '#eab308',
-      fact: 'Taxis are short-trip vehicles for hire. The bright yellow color used in many cities was chosen because it stands out from other traffic at a distance.' },
-    { id: 'bicycle', name: 'Bicycle', icon: '🚲', color: '#0ea5e9',
-      fact: 'Bicycles are one of the most efficient ways to travel using only human power. They produce no pollution and need very little space to park.' },
-    { id: 'cone', name: 'Traffic Cone', icon: '🚧', color: '#f97316',
-      fact: 'Traffic cones warn drivers about hazards or road work. Their bright orange color and reflective stripes make them easy to see in any weather.' },
-    { id: 'mailbox', name: 'Mailbox', icon: '📮', color: '#2563eb',
-      fact: 'Mailboxes let people send letters without visiting the post office. Collection times are printed on the side so senders know when their mail will leave.' },
-    { id: 'manhole', name: 'Manhole Cover', icon: '⚙️', color: '#374151',
-      fact: 'Manhole covers seal access points to pipes and cables beneath the street. They are usually round so they cannot fall through the opening they protect.' },
-    { id: 'newsstand', name: 'Newspaper Stand', icon: '📰', color: '#7c3aed',
-      fact: 'Newspaper stands once dotted nearly every busy corner. They still sell papers and snacks in many cities, even as more readers move to phones and tablets.' },
-    { id: 'pigeon', name: 'Pigeon', icon: '🕊️', color: '#94a3b8',
-      fact: 'Pigeons thrive in cities because tall buildings mimic the cliffs their ancestors lived on. They can find their way home from hundreds of kilometers away.' },
+    { id: 'rachel-bloom', name: 'Covina, CA', image: ASSETS + 'Rachel Bloom - Cut Out.png', color: '#ef4444',
+      fact: 'Rachel Bloom is an actress, writer, and musician best known as the co-creator and star of Crazy Ex-Girlfriend, the musical comedy series set in West Covina, California.' },
+    { id: 'statue-liberty', name: 'NYC', image: ASSETS + 'Statue of Liberty - Cut Out.png', color: '#10b981',
+      fact: 'The Statue of Liberty stands on Liberty Island in New York Harbor. A gift from France in 1886, she has welcomed millions of new arrivals to the United States.' },
+    { id: 'crab', name: 'Maryland', image: ASSETS + 'Crab - Cut Out.png', color: '#f97316',
+      fact: 'The blue crab is the official state crustacean of Maryland. Steamed crabs and Old Bay are a Chesapeake Bay summer tradition.' },
+    { id: 'millennium-tower', name: 'Luxury Housing', image: ASSETS + 'Millenium Tower@4x.png', color: '#64748b',
+      fact: 'San Francisco’s Millennium Tower is a 58-story luxury residential building completed in 2009. It became famous for an ongoing tilt that prompted a major engineering retrofit.' },
+    { id: 'sf-chronicle', name: 'San Francisco Media', image: ASSETS + 'SF Chronicle Logo - San_Francisco_Chronicle_Logo_full.png', color: '#1f2937',
+      fact: 'The San Francisco Chronicle is the city’s largest daily newspaper. Founded in 1865, it remains the leading voice covering Bay Area politics, culture, and civic life.' },
+    { id: 'lunch-pail', name: 'Labor Unions', image: ASSETS + 'Lunch Pail - Cut out.png', color: '#a16207',
+      fact: 'The lunch pail is a classic symbol of working-class labor. Unions advocate for fair wages, safe conditions, and collective bargaining across many San Francisco industries.' },
+    { id: 'victorian-house', name: 'SF Neighborhood Groups', image: ASSETS + 'Victorian House@4x.png', color: '#9333ea',
+      fact: 'Victorian homes line many of San Francisco’s hilly streets. Neighborhood groups help preserve their character and shape local decisions on housing, zoning, and traffic.' },
+    { id: 'bullhorn', name: 'SF Political Organizations', image: ASSETS + 'Bullhorn - Cutout.png', color: '#dc2626',
+      fact: 'Harvey Milk used a bullhorn to rally crowds on the streets of San Francisco. Today, political organizations still raise their voices on housing, transit, and civil rights.' },
+    { id: 'podium', name: 'SF Elected Leaders', image: ASSETS + 'Podium and Microphones - Cut Out.png', color: '#0ea5e9',
+      fact: 'From the podium, San Francisco’s elected leaders address voters and the press. The city’s officials include the Mayor, the Board of Supervisors, and the City Attorney.' },
+    { id: 'nancy-pelosi', name: 'Nancy Pelosi', image: ASSETS + 'Nancy Pelosi - Cut Out Well 2.png', color: '#7c3aed',
+      fact: 'Nancy Pelosi has represented San Francisco in the U.S. House of Representatives since 1987. She served as Speaker of the House twice, the first woman to hold that office.' },
+    { id: 'bernie-sanders', name: 'Bernie Sanders', image: ASSETS + 'Bernie - Cut Out for Game.png', color: '#1d4ed8',
+      fact: 'Bernie Sanders is the longest-serving Independent in U.S. congressional history. The senator from Vermont is known for championing universal health care and workers’ rights.' },
+    { id: 'aoc', name: 'AOC', image: ASSETS + 'AOC - Cut Out.png', color: '#db2777',
+      fact: 'Alexandria Ocasio-Cortez, known as AOC, represents New York’s 14th congressional district. Elected in 2018, she is one of the youngest women ever to serve in Congress.' },
+    { id: 'city-hall', name: 'City Hall', image: ASSETS + 'SF City Hall@4x.png', color: '#ca8a04',
+      fact: 'San Francisco’s City Hall, completed in 1915, features one of the largest domes in the world. It houses the Mayor’s office and is a frequent backdrop for civic events.' },
+    { id: 'gavel', name: 'SF Commissions', image: ASSETS + 'Gavel - Cut Out.png', color: '#92400e',
+      fact: 'San Francisco has dozens of commissions advising the city on everything from planning to police accountability. The gavel keeps their public meetings on track.' },
+    { id: 'neighborhood-org', name: 'Neighborhood Organization', image: ASSETS + 'Hands Grouped Together.png', color: '#0d9488',
+      fact: 'Neighborhood organizations bring residents together to shape life on their streets — parks, schools, housing, and public safety often start at this grassroots level.' },
+    { id: 'hundred-bill', name: 'Campaign Spending', image: ASSETS + 'One Hundred Dollar Bill.png', color: '#15803d',
+      fact: 'Campaign spending in San Francisco elections is publicly tracked. Disclosure rules require candidates and committees to report contributions and how the money is used.' },
+    { id: 'aoc-coat', name: 'AOC says, "No Comment."', image: ASSETS + 'AOC - No Comment Double Corrected.png', color: '#be123c',
+      fact: 'AOC’s 2021 Met Gala dress turned heads with the phrase "Tax The Rich." Like that dress, her "No Comment" coat became a viral moment of political fashion.' },
+    { id: 'protest-sign', name: 'Issues-Based Campaign', image: ASSETS + 'Protestor w Sign@4x.png', color: '#ea580c',
+      fact: 'Issues-based campaigns rally voters around a single cause — like housing, transit, or public safety — instead of around an individual candidate.' },
+    { id: 'sf-ballot', name: 'SF Voting Record', image: ASSETS + 'SF Ballot Envelope.png', color: '#2563eb',
+      fact: 'San Franciscans can return their ballots by mail using a pre-paid envelope. Voting history is part of the public record, while each ballot’s choices stay private.' },
+    { id: 'stripe', name: 'Stripe', image: ASSETS + 'Stripe Logo - Cut Out.png', color: '#635bff',
+      fact: 'Stripe, headquartered in South San Francisco, is one of the world’s largest payments technology companies. It processes billions of dollars in transactions for businesses online.' },
   ];
   return { OBJECTS };
 })();
@@ -978,8 +980,8 @@ const GameState = (() => {
    Board — builds tile DOM, shuffles, exposes tile lookup
    --------------------------------------------------------- */
 const Board = (() => {
-  const BOARD_SIZE = 60;
-  const COPIES_PER_OBJECT = 3;
+  const BOARD_SIZE = 40;
+  const COPIES_PER_OBJECT = 2;
 
   const boardEl = document.getElementById('board');
   let tiles = []; // { index, objectId, el }
@@ -998,6 +1000,15 @@ const Board = (() => {
       for (let c = 0; c < COPIES_PER_OBJECT; c++) ids.push(obj.id);
     }
     return fisherYatesShuffle(ids);
+  }
+
+  function escapeAttr(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   function render() {
@@ -1027,8 +1038,8 @@ const Board = (() => {
           </div>
           <div class="tile-face tile-front" style="--object-color: ${obj.color}">
             <div class="top-bar"></div>
-            <div class="icon" aria-hidden="true">${obj.icon}</div>
-            <div class="name">${obj.name}</div>
+            <img class="icon" src="${escapeAttr(obj.image)}" alt="" aria-hidden="true" draggable="false" />
+            <div class="name">${escapeAttr(obj.name)}</div>
           </div>
         </div>
       `;
@@ -1076,7 +1087,7 @@ const UI = (() => {
   const btnPlayAgain = document.getElementById('btn-play-again');
   const btnWinClose = document.getElementById('btn-win-close');
 
-  const TITLES = ['Nice match!', 'Triplet found!', 'Three of a kind!', 'Perfect spot!', 'You found it!'];
+  const TITLES = ['Nice match!', 'Pair found!', 'Two of a kind!', 'Perfect spot!', 'You found it!'];
 
   let lastFocusedBeforeModal = null;
   let focusTrapHandler = null;
@@ -1171,7 +1182,8 @@ const UI = (() => {
 
   function showMatchModal(obj) {
     matchTitle.textContent = TITLES[Math.floor(Math.random() * TITLES.length)];
-    matchIcon.textContent = obj.icon;
+    matchIcon.src = obj.image;
+    matchIcon.alt = obj.name;
     matchName.textContent = obj.name;
     matchFact.textContent = obj.fact;
     return new Promise((resolve) => {
@@ -1358,7 +1370,7 @@ const Confetti = (() => {
    TurnController — click handling + turn flow
    --------------------------------------------------------- */
 const TurnController = (() => {
-  const TILES_PER_TURN = 3;
+  const TILES_PER_TURN = 2;
   const MISMATCH_VIEW_MS = 1200;
 
   function flipUp(tile) {
@@ -1396,7 +1408,7 @@ const TurnController = (() => {
       return;
     }
 
-    // Third tile flipped — evaluate
+    // Second tile flipped — evaluate
     await evaluateTurn();
   }
 
@@ -1565,7 +1577,7 @@ const App = (() => {
 })();
 
 // Expose a tiny debug namespace, nothing more.
-window.TripletMatch = { App, GameState, Board, Data };
+window.SaikatShuffle = { App, GameState, Board, Data };
 
 document.addEventListener('DOMContentLoaded', () => {
   App.bootstrap();
