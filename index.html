@@ -64,6 +64,22 @@
     padding: 24px 16px 32px;
   }
 
+  /* Hide the game shell until the player presses Play, so the loading
+     screen and main menu stand alone. */
+  .hud,
+  .panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 320ms ease-out, transform 320ms ease-out;
+  }
+  body.game-active .hud,
+  body.game-active .panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
   /* ===== HUD ===== */
   .hud {
     width: min(1100px, 95vw);
@@ -803,6 +819,8 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="start-title">
     <span class="badge">A CITY MEMORY GAME</span>
     <h1 id="start-title">The Saikat Shuffle</h1>
+    <p class="tagline">Flip the folders. Find every pair.</p>
+    <p class="instructions">40 folders, 20 hidden objects. Tap two folders to flip them — match a pair and they’re cleared. Clear the board to win.</p>
     <div class="modal-buttons">
       <button class="btn btn-primary" id="btn-start" type="button">Play</button>
     </div>
@@ -1561,15 +1579,13 @@ const App = (() => {
     TurnController.bind();
     document.getElementById('btn-restart').addEventListener('click', handleRestartClick);
 
-    // Render an initial faded board behind the menus for visual context
-    Board.render();
-    UI.renderHUD();
-
-    // Initial loading screen — fixed 3 seconds, then main menu.
+    // Loading screen → main menu → game. The HUD and board panel stay
+    // hidden until the player clicks Play (see body.game-active in CSS).
     await Animator.wait(3000);
     await hideLoadingScreen();
 
     await UI.showStart();
+    document.body.classList.add('game-active');
     newGame();
   }
 
