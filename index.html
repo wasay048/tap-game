@@ -47,7 +47,12 @@
     color: var(--text-primary);
     background-color: #0b1020;
     overflow-x: hidden;
+    /* Hide vertical scrollbar but keep scrolling (better embed look) */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
   body {
     background-image:
@@ -220,12 +225,27 @@
     padding: 0;
     margin: 0;
     cursor: pointer;
-    aspect-ratio: 88 / 110;
+    /* Landscape ratio that matches the folder artwork — no dead space */
+    aspect-ratio: 4 / 3;
     perspective: 900px;
     border-radius: 10px;
-    transition: transform 150ms ease-out, filter 200ms ease-out, opacity 350ms ease-out;
+    /* Subtle per-tile "scattered files" rotation (overridden below per nth-child) */
+    --rest-rotate: 0deg;
+    transform: rotate(var(--rest-rotate));
+    transition:
+      transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 220ms ease-out,
+      opacity 350ms ease-out;
     will-change: transform;
   }
+  /* Mild rotational variety, applied via :nth-child so it survives reshuffles */
+  .tile:nth-child(7n+1) { --rest-rotate: -1.4deg; }
+  .tile:nth-child(7n+2) { --rest-rotate:  1.1deg; }
+  .tile:nth-child(7n+3) { --rest-rotate: -2.0deg; }
+  .tile:nth-child(7n+4) { --rest-rotate:  0.7deg; }
+  .tile:nth-child(7n+5) { --rest-rotate: -0.6deg; }
+  .tile:nth-child(7n+6) { --rest-rotate:  1.6deg; }
+  .tile:nth-child(7n)   { --rest-rotate: -1.1deg; }
   .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
 
   .tile-inner {
@@ -235,6 +255,10 @@
     transition: transform var(--flip-back-duration) var(--flip-easing);
     transform-style: preserve-3d;
     will-change: transform;
+  }
+  .tile.is-flipped {
+    /* Straighten the file once it's flipped — the front face reads cleanly. */
+    transform: rotate(0deg);
   }
   .tile.is-flipped .tile-inner {
     transform: rotateY(180deg);
@@ -257,43 +281,34 @@
       0 1px 0 rgba(255, 255, 255, 0.4) inset;
   }
 
-  /* Back (face-down) — file folder */
+  /* Back (face-down) — "Confidential" folder artwork, no card back */
   .tile-back {
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.18), rgba(0,0,0,0) 30%),
-      repeating-linear-gradient(45deg, rgba(0,0,0,0.025) 0 2px, transparent 2px 5px),
-      linear-gradient(160deg, var(--folder-cream) 0%, var(--folder-cream-dark) 100%);
+    background: transparent url('untapped.png') center center / contain no-repeat;
     color: #6b5524;
+    box-shadow: none;
+    /* Shadow follows the folder silhouette (drop-shadow on the image, not the rect) */
+    filter:
+      drop-shadow(0 8px 10px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
   }
-  .tile-back::before {
-    /* folder tab */
-    content: "";
-    position: absolute;
-    top: -6px; left: 10%;
-    width: 38%; height: 18%;
-    background: linear-gradient(180deg, var(--folder-tab), var(--folder-cream-dark));
-    border-radius: 6px 8px 0 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
-  }
-  .tile-back::after {
-    /* label band */
-    content: "";
-    position: absolute;
-    bottom: 14%; left: 14%; right: 14%;
-    height: 14%;
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px dashed rgba(0, 0, 0, 0.18);
-    border-radius: 3px;
-  }
+  /* Number rendered as a small stamped/typed label on the lower-right of the folder body */
   .tile-back .tile-number {
     position: absolute;
-    bottom: 18%; left: 0; right: 0;
-    text-align: center;
-    font-weight: 700;
-    font-size: clamp(10px, 1.2vw, 13px);
-    color: #8a6a1f;
-    letter-spacing: 0.5px;
+    bottom: 12%;
+    right: 11%;
+    font-family: 'Courier New', 'Roboto Mono', ui-monospace, monospace;
+    font-weight: 800;
+    font-size: clamp(10px, 1.15vw, 14px);
+    color: #5a4418;
+    letter-spacing: 2px;
+    background: rgba(255, 252, 240, 0.86);
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px dashed rgba(90, 68, 24, 0.4);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    transform: rotate(-3deg);
     z-index: 1;
+    pointer-events: none;
   }
 
   /* Front (revealed) — paper card */
@@ -330,10 +345,17 @@
     padding: 0 2px;
   }
 
-  /* Hover (face-down only) */
+  /* Hover (face-down only): straighten the file & lift it slightly,
+     as if the player is picking it up to look. */
   .tile:not(.is-flipped):not(.is-matched):not(.is-locked):hover {
-    transform: translateY(-4px);
-    filter: drop-shadow(0 10px 14px rgba(0,0,0,0.35));
+    transform: rotate(0deg) translateY(-6px) scale(1.04);
+    filter:
+      drop-shadow(0 16px 22px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+  }
+  .tile:not(.is-flipped):not(.is-matched):not(.is-locked):active {
+    transform: rotate(0deg) translateY(-2px) scale(1.01);
+    transition-duration: 80ms;
   }
 
   /* Matched */
