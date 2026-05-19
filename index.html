@@ -225,8 +225,9 @@
     padding: 0;
     margin: 0;
     cursor: pointer;
-    /* Landscape ratio that matches the folder artwork — no dead space */
-    aspect-ratio: 4 / 3;
+    /* Landscape-ish ratio that hugs the folder artwork while leaving
+       enough vertical room on the front face for long, wrapping names. */
+    aspect-ratio: 9 / 8;
     perspective: 900px;
     border-radius: 10px;
     /* Subtle per-tile "scattered files" rotation (overridden below per nth-child) */
@@ -326,8 +327,8 @@
     background: var(--object-color, #94a3b8);
   }
   .tile-front .icon {
-    width: 86%;
-    height: 62%;
+    width: 82%;
+    height: 52%;
     object-fit: contain;
     margin-top: 8px;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
@@ -337,12 +338,12 @@
     margin-top: 4px;
     font-size: clamp(7px, 0.78vw, 10px);
     font-weight: 700;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
     color: #4a3a1c;
     text-align: center;
-    line-height: 1.12;
-    padding: 0 2px;
+    line-height: 1.1;
+    padding: 0 4px 2px;
   }
 
   /* Hover (face-down only): straighten the file & lift it slightly,
