@@ -292,25 +292,6 @@
       drop-shadow(0 8px 10px rgba(0, 0, 0, 0.45))
       drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
   }
-  /* Number rendered as a small stamped/typed label on the lower-right of the folder body */
-  .tile-back .tile-number {
-    position: absolute;
-    bottom: 12%;
-    right: 11%;
-    font-family: 'Courier New', 'Roboto Mono', ui-monospace, monospace;
-    font-weight: 800;
-    font-size: clamp(10px, 1.15vw, 14px);
-    color: #5a4418;
-    letter-spacing: 2px;
-    background: rgba(255, 252, 240, 0.86);
-    padding: 2px 7px;
-    border-radius: 3px;
-    border: 1px dashed rgba(90, 68, 24, 0.4);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
-    transform: rotate(-3deg);
-    z-index: 1;
-    pointer-events: none;
-  }
 
   /* Front (revealed) — paper card */
   .tile-front {
@@ -327,23 +308,12 @@
     background: var(--object-color, #94a3b8);
   }
   .tile-front .icon {
-    width: 82%;
-    height: 52%;
+    width: 94%;
+    height: 88%;
     object-fit: contain;
-    margin-top: 8px;
+    margin-top: 6px;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
     display: block;
-  }
-  .tile-front .name {
-    margin-top: 4px;
-    font-size: clamp(7px, 0.78vw, 10px);
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    color: #4a3a1c;
-    text-align: center;
-    line-height: 1.1;
-    padding: 0 4px 2px;
   }
 
   /* Hover (face-down only): straighten the file & lift it slightly,
@@ -675,7 +645,6 @@
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 6px;
     }
-    .tile-front .name { font-size: 7px; letter-spacing: 0.2px; }
   }
 
   /* ===== Reduced motion ===== */
@@ -887,46 +856,46 @@
 const Data = (() => {
   const ASSETS = 'assets/';
   const OBJECTS = [
-    { id: 'rachel-bloom', name: 'Covina, CA', image: ASSETS + 'Rachel Bloom - Cut Out.png', color: '#ef4444',
-      fact: 'Rachel Bloom is an actress, writer, and musician best known as the co-creator and star of Crazy Ex-Girlfriend, the musical comedy series set in West Covina, California.' },
-    { id: 'statue-liberty', name: 'NYC', image: ASSETS + 'Statue of Liberty - Cut Out.png', color: '#10b981',
-      fact: 'The Statue of Liberty stands on Liberty Island in New York Harbor. A gift from France in 1886, she has welcomed millions of new arrivals to the United States.' },
-    { id: 'crab', name: 'Maryland', image: ASSETS + 'Crab - Cut Out.png', color: '#f97316',
-      fact: 'The blue crab is the official state crustacean of Maryland. Steamed crabs and Old Bay are a Chesapeake Bay summer tradition.' },
-    { id: 'millennium-tower', name: 'Luxury Housing', image: ASSETS + 'Millenium Tower@4x.png', color: '#64748b',
-      fact: 'San Francisco’s Millennium Tower is a 58-story luxury residential building completed in 2009. It became famous for an ongoing tilt that prompted a major engineering retrofit.' },
-    { id: 'sf-chronicle', name: 'San Francisco Media', image: ASSETS + 'SF Chronicle Logo - San_Francisco_Chronicle_Logo_full.png', color: '#1f2937',
-      fact: 'The San Francisco Chronicle is the city’s largest daily newspaper. Founded in 1865, it remains the leading voice covering Bay Area politics, culture, and civic life.' },
-    { id: 'lunch-pail', name: 'Labor Unions', image: ASSETS + 'Lunch Pail - Cut out.png', color: '#a16207',
-      fact: 'The lunch pail is a classic symbol of working-class labor. Unions advocate for fair wages, safe conditions, and collective bargaining across many San Francisco industries.' },
-    { id: 'victorian-house', name: 'SF Neighborhood Groups', image: ASSETS + 'Victorian House@4x.png', color: '#9333ea',
-      fact: 'Victorian homes line many of San Francisco’s hilly streets. Neighborhood groups help preserve their character and shape local decisions on housing, zoning, and traffic.' },
-    { id: 'bullhorn', name: 'SF Political Organizations', image: ASSETS + 'Bullhorn - Cutout.png', color: '#dc2626',
-      fact: 'Harvey Milk used a bullhorn to rally crowds on the streets of San Francisco. Today, political organizations still raise their voices on housing, transit, and civil rights.' },
-    { id: 'podium', name: 'SF Elected Leaders', image: ASSETS + 'Podium and Microphones - Cut Out.png', color: '#0ea5e9',
-      fact: 'From the podium, San Francisco’s elected leaders address voters and the press. The city’s officials include the Mayor, the Board of Supervisors, and the City Attorney.' },
-    { id: 'nancy-pelosi', name: 'Nancy Pelosi', image: ASSETS + 'Nancy Pelosi - Cut Out Well 2.png', color: '#7c3aed',
-      fact: 'Nancy Pelosi has represented San Francisco in the U.S. House of Representatives since 1987. She served as Speaker of the House twice, the first woman to hold that office.' },
-    { id: 'bernie-sanders', name: 'Bernie Sanders', image: ASSETS + 'Bernie - Cut Out for Game.png', color: '#1d4ed8',
-      fact: 'Bernie Sanders is the longest-serving Independent in U.S. congressional history. The senator from Vermont is known for championing universal health care and workers’ rights.' },
-    { id: 'aoc', name: 'AOC', image: ASSETS + 'AOC - Cut Out.png', color: '#db2777',
-      fact: 'Alexandria Ocasio-Cortez, known as AOC, represents New York’s 14th congressional district. Elected in 2018, she is one of the youngest women ever to serve in Congress.' },
-    { id: 'city-hall', name: 'City Hall', image: ASSETS + 'SF City Hall@4x.png', color: '#ca8a04',
-      fact: 'San Francisco’s City Hall, completed in 1915, features one of the largest domes in the world. It houses the Mayor’s office and is a frequent backdrop for civic events.' },
-    { id: 'gavel', name: 'SF Commissions', image: ASSETS + 'Gavel - Cut Out.png', color: '#92400e',
-      fact: 'San Francisco has dozens of commissions advising the city on everything from planning to police accountability. The gavel keeps their public meetings on track.' },
-    { id: 'neighborhood-org', name: 'Neighborhood Organization', image: ASSETS + 'Hands Grouped Together.png', color: '#0d9488',
-      fact: 'Neighborhood organizations bring residents together to shape life on their streets — parks, schools, housing, and public safety often start at this grassroots level.' },
-    { id: 'hundred-bill', name: 'Campaign Spending', image: ASSETS + 'One Hundred Dollar Bill.png', color: '#15803d',
-      fact: 'Campaign spending in San Francisco elections is publicly tracked. Disclosure rules require candidates and committees to report contributions and how the money is used.' },
-    { id: 'aoc-coat', name: 'AOC says, "No Comment."', image: ASSETS + 'AOC - No Comment Double Corrected.png', color: '#be123c',
-      fact: 'AOC’s 2021 Met Gala dress turned heads with the phrase "Tax The Rich." Like that dress, her "No Comment" coat became a viral moment of political fashion.' },
-    { id: 'protest-sign', name: 'Issues-Based Campaign', image: ASSETS + 'Protestor w Sign@4x.png', color: '#ea580c',
-      fact: 'Issues-based campaigns rally voters around a single cause — like housing, transit, or public safety — instead of around an individual candidate.' },
-    { id: 'sf-ballot', name: 'SF Voting Record', image: ASSETS + 'SF Ballot Envelope.png', color: '#2563eb',
-      fact: 'San Franciscans can return their ballots by mail using a pre-paid envelope. Voting history is part of the public record, while each ballot’s choices stay private.' },
-    { id: 'stripe', name: 'Stripe', image: ASSETS + 'Stripe Logo - Cut Out.png', color: '#635bff',
-      fact: 'Stripe, headquartered in South San Francisco, is one of the world’s largest payments technology companies. It processes billions of dollars in transactions for businesses online.' },
+    { id: 'rachel-bloom', name: 'Covina, CA', title: 'Covina, CA', image: ASSETS + 'Rachel Bloom - Cut Out.png', color: '#ef4444',
+      fact: 'As recently as 2025, Saikat Chakrabarti used his address in Covina, California on numerous entries of official Federal Elections Commissions forms.' },
+    { id: 'statue-liberty', name: 'NYC', title: 'So Many Addresses!', image: ASSETS + 'Statue of Liberty - Cut Out.png', color: '#10b981',
+      fact: 'Saikat has used addresses in many different places in the U.S. including Maryland, New York, California, Tennessee, and Massachusetts. It begs the question—what are his actual roots in San Francisco?' },
+    { id: 'crab', name: 'Maryland', title: 'Saikat loves Maryland!', image: ASSETS + 'Crab - Cut Out.png', color: '#f97316',
+      fact: 'Under penalty of perjury, Saikat claimed his principal residence as being in Gaithersburg, Maryland until 2025.' },
+    { id: 'millennium-tower', name: 'Luxury Housing', title: 'Luxury Housing', image: ASSETS + 'Millenium Tower@4x.png', color: '#64748b',
+      fact: 'As a candidate, Saikat has talked about needing housing at market rates, which for SF is definitely luxury housing!' },
+    { id: 'sf-chronicle', name: 'San Francisco Media', title: 'SF Media', image: ASSETS + 'SF Chronicle Logo - San_Francisco_Chronicle_Logo_full.png', color: '#1f2937',
+      fact: 'Saikat Chakrabarti has secured zero endorsements from SF local media.' },
+    { id: 'lunch-pail', name: 'Labor Unions', title: 'Organized Labor', image: ASSETS + 'Lunch Pail - Cut out.png', color: '#a16207',
+      fact: 'Despite the dozens of labor unions in SF, Saikat has not been endorsed by a single one.' },
+    { id: 'victorian-house', name: 'SF Neighborhood Groups', title: 'SF Neighborhood Groups', image: ASSETS + 'Victorian House@4x.png', color: '#9333ea',
+      fact: 'Zero neighborhood groups have officially endorsed Saikat’s campaign (although one of the dozens of SF political clubs, did).' },
+    { id: 'bullhorn', name: 'SF Political Organizations', title: 'SF Political Organizations', image: ASSETS + 'Bullhorn - Cutout.png', color: '#dc2626',
+      fact: 'Of the dozens of political organizations in SF, only 1 voted to endorse Saikat’s candidacy for Congress. All other clubs and organizations endorsed other candidates.' },
+    { id: 'podium', name: 'SF Elected Leaders', title: 'SF Elected Leaders', image: ASSETS + 'Podium and Microphones - Cut Out.png', color: '#0ea5e9',
+      fact: 'Saikat has earned exactly zero endorsements from current SF elected officials.' },
+    { id: 'nancy-pelosi', name: 'Nancy Pelosi', title: 'Nancy Pelosi', image: ASSETS + 'Nancy Pelosi - Cut Out Well 2.png', color: '#7c3aed',
+      fact: 'While Saikat runs to replace her based on his thread-bare experience, Nancy Pelosi formally endorsed Connie Chan to succeed her.' },
+    { id: 'bernie-sanders', name: 'Bernie Sanders', title: 'Bernie says NO!', image: ASSETS + 'Bernie - Cut Out for Game.png', color: '#1d4ed8',
+      fact: 'Despite talking about his working on Bernie’s presidential campaign as a senior staff member, Sen. Sanders has refused to endorse Saikat—even though he regularly endorses candidates running in SF.' },
+    { id: 'aoc', name: 'AOC', title: 'AOC', image: ASSETS + 'AOC - Cut Out.png', color: '#db2777',
+      fact: 'Rep. Alexandria Ocasio-Cortez has been asked—point blank, several times—why she has refused to endorse her former Chief of Staff, Saikat Chakrabarti. She has declined to even say his name in response.' },
+    { id: 'city-hall', name: 'City Hall', title: 'No Experience', image: ASSETS + 'SF City Hall@4x.png', color: '#ca8a04',
+      fact: 'There are dozens of advisory committees at San Francisco City Hall. Saikat has never bothered to volunteer his expertise for these citizen-led committees.' },
+    { id: 'gavel', name: 'SF Commissions', title: 'SF Commissions', image: ASSETS + 'Gavel - Cut Out.png', color: '#92400e',
+      fact: 'Major SF Departments are overseen by Commissions. These are important civic positions. Saikat has never held one of the hundreds of Commissioner positions in San Francisco.' },
+    { id: 'neighborhood-org', name: 'Neighborhood Organization', title: 'Neighborhood Leadership', image: ASSETS + 'Hands Grouped Together.png', color: '#0d9488',
+      fact: 'Saikat has never served as a president or officer in any SF neighborhood group.' },
+    { id: 'hundred-bill', name: 'Campaign Spending', title: 'Money, money, money!!!', image: ASSETS + 'One Hundred Dollar Bill.png', color: '#15803d',
+      fact: 'Saikat has spent over $5 million in this campaign to fool voters into thinking he is a worthy candidate. Without sizably outspending every other candidate combined, would anyone even consider Saikat a ‘serious’ candidate?' },
+    { id: 'aoc-coat', name: 'AOC says, "No Comment."', title: 'The AOC Connection', image: ASSETS + 'AOC - No Comment Double Corrected.png', color: '#be123c',
+      fact: 'AOC has been peppered by the media regarding Saikat and his work in her office. For her part, AOC has steadfastly said she has “no comment” and didn’t choose to speak about their relationship at all.' },
+    { id: 'protest-sign', name: 'Issues-Based Campaign', title: 'Issues Campaign', image: ASSETS + 'Protestor w Sign@4x.png', color: '#ea580c',
+      fact: 'Every election cycle, SF voters decide on many different propositions. Has Saikat been a leader on any electoral issue in the past? Nooooooo!' },
+    { id: 'sf-ballot', name: 'SF Voting Record', title: 'SF Voting Record', image: ASSETS + 'SF Ballot Envelope.png', color: '#2563eb',
+      fact: 'In nearly 10 years that Saikat claimed he lived in SF—he voted just one time. How’s that for being engaged with politics!' },
+    { id: 'stripe', name: 'Stripe', title: 'The Startup Lottery.', image: ASSETS + 'Stripe Logo - Cut Out.png', color: '#635bff',
+      fact: 'This is the only reason Saikat Chakrabarti is talked about by anyone. He made a fortune (reportedly estimated at north of $150 million) as an early engineer at Stripe. He’s now spending part of his fortune trying to buy off voters to get elected to Congress.' },
   ];
   return { OBJECTS };
 })();
@@ -1074,13 +1043,10 @@ const Board = (() => {
 
       btn.innerHTML = `
         <div class="tile-inner">
-          <div class="tile-face tile-back">
-            <div class="tile-number">${String(i + 1).padStart(2, '0')}</div>
-          </div>
+          <div class="tile-face tile-back"></div>
           <div class="tile-face tile-front" style="--object-color: ${obj.color}">
             <div class="top-bar"></div>
             <img class="icon" src="${escapeAttr(obj.image)}" alt="" aria-hidden="true" draggable="false" />
-            <div class="name">${escapeAttr(obj.name)}</div>
           </div>
         </div>
       `;
@@ -1128,7 +1094,6 @@ const UI = (() => {
   const btnPlayAgain = document.getElementById('btn-play-again');
   const btnWinClose = document.getElementById('btn-win-close');
 
-  const TITLES = ['Nice match!', 'Pair found!', 'Two of a kind!', 'Perfect spot!', 'You found it!'];
 
   let lastFocusedBeforeModal = null;
   let focusTrapHandler = null;
@@ -1222,10 +1187,12 @@ const UI = (() => {
   }
 
   function showMatchModal(obj) {
-    matchTitle.textContent = TITLES[Math.floor(Math.random() * TITLES.length)];
+    const heading = obj.title || obj.name;
+    matchTitle.textContent = heading;
     matchIcon.src = obj.image;
     matchIcon.alt = obj.name;
     matchName.textContent = obj.name;
+    matchName.style.display = obj.name === heading ? 'none' : '';
     matchFact.textContent = obj.fact;
     return new Promise((resolve) => {
       openOverlay(matchOverlay, btnContinue);
